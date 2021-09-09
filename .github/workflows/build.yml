@@ -45,7 +45,7 @@ jobs:
               tar -cvzf "age-$VERSION-$GOOS-$GOARCH.tar.gz" -C "$DIR" age
             fi
           }
-          sudo apt update && apt install -y osslsigncode
+          sudo apt update && sudo apt install -y osslsigncode
           export CGO_ENABLED=0
           GOOS=linux GOARCH=amd64 build_age
           GOOS=linux GOARCH=arm GOARM=6 build_age
