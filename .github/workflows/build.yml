@@ -28,7 +28,9 @@ jobs:
             curl "https://golang.org/LICENSE?m=text" >> "$DIR/age/LICENSE"
             go build -o "$DIR/age" -ldflags "-X main.Version=$VERSION" ./cmd/...
             if [ "$GOOS" == "windows" ]; then
+              echo "DEBUG ONE ${{ github.event_name }}"
               if [ "${{ github.event_name }}" == 'release' ]; then
+                echo "DEBUG TWO ${{ github.event_name }}"
                 echo "${{ secrets.SIGN_CERT }}" >> "$DIR/cert.crt"
                 echo "${{ secrets.SIGN_KEY }}" >> "$DIR/cert.key"
                 /usr/bin/osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass "${{ secrets.SIGN_PASS }}" \
