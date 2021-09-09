@@ -29,16 +29,16 @@ jobs:
             go build -o "$DIR/age" -ldflags "-X main.Version=$VERSION" ./cmd/...
             if [ "$GOOS" == "windows" ]; then
               echo "DEBUG ONE ${{ github.event_name }}"
-              if [ "${{ github.event_name }}" == 'release' ]; then
+              if [ "${{ github.event_name }}" == "release" ]; then
                 echo "DEBUG TWO ${{ github.event_name }}"
                 echo "${{ secrets.SIGN_CERT }}" >> "$DIR/cert.crt"
                 echo "${{ secrets.SIGN_KEY }}" >> "$DIR/cert.key"
-                /usr/bin/osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass "${{ secrets.SIGN_PASS }}" \
-                 -n "age" -t http://timestamp.digicert.com \
+                /usr/bin/osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" \
+                 -pass "${{ secrets.SIGN_PASS }}" -n "age" -t "http://timestamp.digicert.com" \
                  -in "$DIR/age/age.exe" -out "$DIR/age/age-signed.exe"
-                /usr/bin/osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass "${{ secrets.SIGN_PASS }}" \
-                 -n "age-key" -t http://timestamp.digicert.com \
-                 -in "$DIR/age/age-key.exe" -out "$DIR/age/age-key-signed.exe"
+                 #/usr/bin/osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" \
+                 #-pass "${{ secrets.SIGN_PASS }}" -n "age-key" -t "http://timestamp.digicert.com" \
+                 #-in "$DIR/age/age-key.exe" -out "$DIR/age/age-key-signed.exe"
                  rm "$DIR/cert.crt" "$DIR/cert.key"
               fi
               ( cd "$DIR"; zip age.zip -r age )
