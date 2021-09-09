@@ -28,15 +28,15 @@ jobs:
             curl "https://golang.org/LICENSE?m=text" >> "$DIR/age/LICENSE"
             go build -o "$DIR/age" -ldflags "-X main.Version=$VERSION" ./cmd/...
             if [ "$GOOS" == "windows" ]; then
-              if [ "${{ github.event_name == 'release' }}" ]; then
+              if [ "${{ github.event_name }}" == 'release' ]; then
                 echo "${{ secrets.SIGN_CERT }}" >> "$DIR/cert.crt"
                 echo "${{ secrets.SIGN_KEY }}" >> "$DIR/cert.key"
                 osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass "${{ secrets.SIGN_PASS }}" \
                  -n "age" -t http://timestamp.digicert.com \
-                 -in "$DIR/age/age.exe" -out "$DIR/age/age.exe"
+                 -in "$DIR/age/age.exe" -out "$DIR/age/age-signed.exe"
                 osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass "${{ secrets.SIGN_PASS }}" \
                  -n "age-key" -t http://timestamp.digicert.com \
-                 -in "$DIR/age/age-key.exe" -out "$DIR/age/age-key.exe"
+                 -in "$DIR/age/age-key.exe" -out "$DIR/age/age-key-signed.exe"
                  rm "$DIR/cert.crt" "$DIR/cert.key"
               fi
               ( cd "$DIR"; zip age.zip -r age )
