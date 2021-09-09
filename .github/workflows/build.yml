@@ -28,12 +28,24 @@ jobs:
             curl "https://golang.org/LICENSE?m=text" >> "$DIR/age/LICENSE"
             go build -o "$DIR/age" -ldflags "-X main.Version=$VERSION" ./cmd/...
             if [ "$GOOS" == "windows" ]; then
+              if [ ${{ github.event_name == 'release' }} ]; then
+                echo ${{ secrets.SIGN_CERT }} >> "$DIR/cert.crt"
+                echo ${{ secrets.SIGN_KEY }} >> "$DIR/cert.key"
+                osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass ${{ secrets.SIGN_PASS }} \
+                 -n "age" -t http://timestamp.digicert.com \
+                 -in "$DIR/age/age.exe" -out "$DIR/age/age.exe"
+                osslsigncode sign -certs "$DIR/cert.crt" -key "$DIR/cert.key" -pass ${{ secrets.SIGN_PASS }} \
+                 -n "age-key" -t http://timestamp.digicert.com \
+                 -in "$DIR/age/age-key.exe" -out "$DIR/age/age-key.exe"
+                 rm "$DIR/cert.crt" "$DIR/cert.key"
+              fi
               ( cd "$DIR"; zip age.zip -r age )
               mv "$DIR/age.zip" "age-$VERSION-$GOOS-$GOARCH.zip"
             else
               tar -cvzf "age-$VERSION-$GOOS-$GOARCH.tar.gz" -C "$DIR" age
             fi
           }
+          sudo apt update && apt install -y osslsigncode
           export CGO_ENABLED=0
           GOOS=linux GOARCH=amd64 build_age
           GOOS=linux GOARCH=arm GOARM=6 build_age
